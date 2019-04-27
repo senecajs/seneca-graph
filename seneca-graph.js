@@ -56,8 +56,12 @@ function seneca_graph(options) {
       q.t = msg.to
     }
 
-    const list = await spec.ent.list$(q)
+    const list = (await spec.ent.list$(q)).map(x=>x.data$(false))
 
+    if('entity' === msg.with) {
+      await intern.load_ents(seneca,spec.graph,list)
+    }
+    
     return {list:list}
   }
 
@@ -78,7 +82,11 @@ function seneca_graph(options) {
       var list = await seneca.entity('graph/number').list$({f:root.t,r:relname})
       
       root.c = list.map(x=>x.data$(false))
-      
+
+      if('entity' === msg.with) {
+        await intern.load_ents(seneca,spec.graph,root.c)
+      }
+
       if(depth < maxdepth && depth < options.maxdepth) {
         for(var i = 0; i < root.c.length; i++) {
           await traverse(root.c[i],relname,maxdepth,depth)
@@ -94,6 +102,23 @@ function seneca_graph(options) {
 
 
 const intern = (seneca_graph.intern) = {
+  load_ents: async function(seneca, graph, list) {
+    var ids = list.map(x=>x.t)
+    var ents = await intern.load_from_ids(seneca,graph.entity,ids)
+    for(var i = 0; i < list.length; i++) {
+      list[i].ent = ents[i]
+    }
+  },
+
+  // TODO: seneca-entity should provide this
+  load_from_ids: async function(seneca,canon,ids) {
+    var ents = []
+    for(var i = 0; i < ids.length; i++) {
+      ents.push(await seneca.entity(canon).load$(ids[i]))
+    }
+    return ents
+  },
+  
   resolve_spec: function(seneca, rootspec, msg) {
     const graphname = msg.graph
     const relname   = msg.rel

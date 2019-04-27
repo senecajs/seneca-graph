@@ -51,12 +51,12 @@ lab.test('happy', async () => {
   var out = await si.post('role:graph,list:rel,graph:number',{
     rel:'lessthan',from:zero.id})
 
-  expect(out.list.toString()).equal('$-/graph/number;id=r0;{f:n0,t:n1,r:lessthan}')
+  expect(out.list).equal([ { f: 'n0', t: 'n1', r: 'lessthan', id: 'r0' } ])
   
   out = await si.post('role:graph,list:rel,graph:number',{
     rel:'lessthan',to:one.id})
 
-  expect(out.list.toString()).equal('$-/graph/number;id=r0;{f:n0,t:n1,r:lessthan}')
+  expect(out.list).equal([ { f: 'n0', t: 'n1', r: 'lessthan', id: 'r0' } ])
 
 
   await si.post('role:graph,add:rel,graph:number',{
@@ -79,13 +79,36 @@ lab.test('happy', async () => {
 
   out = await si.post('role:graph,tree:rel,graph:number',{
     rel:'lessthan',from:zero.id})
-  console.log(out)
+
+  expect(out).equal({
+    c:[ { f:'n0', id:'r0', r:'lessthan', t:'n1'},
+        { f:'n0', id:'r1', r:'lessthan', t:'n2'}],
+    from:'n0',graph:'number',rel:'lessthan'})
 
 
   out = await si.post('role:graph,tree:rel,graph:number',{
     rel:'lessthan',from:zero.id,depth:2})
 
+  expect(out).equal({
+    c:[
+      { f:'n0', id:'r0', r:'lessthan', t:'n1', c: [
+        {f: 'n1',id: 'r2',r: 'lessthan',t: 'n2'}
+      ]},
+      { f:'n0', id:'r1', r:'lessthan', t:'n2', c: []}
+    ],
+    from:'n0',graph:'number',rel:'lessthan'})
+
+  out = await si.post('role:graph,list:rel,graph:number,with:entity',{
+    rel:'lessthan',to:one.id})
+
   console.log(out)
+
+
+  out = await si.post('role:graph,tree:rel,graph:number,with:entity',{
+    rel:'lessthan',from:zero.id,depth:2})
+
+  console.log(out)
+  console.log(out.c[0].c)
 })
 
 
