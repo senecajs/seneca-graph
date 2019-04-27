@@ -1,0 +1,42 @@
+{
+  "name": "seneca-graph",
+  "version": "0.1.2",
+  "description": "A Seneca plugin that provides basic graph operations.",
+  "main": "seneca-graph.js",
+  "scripts": {
+    "test": "lab -P test -t 80",
+    "doc": "seneca-doc",
+    "prettier": "prettier --write *.js lib/*.js bin/*.js test/*.js",
+    "coveralls": "lab -s -P test -r lcov | coveralls",
+    "clean-npm": "rm -rf node_modules package-lock.json",
+    "clean-yarn": "rm -rf node_modules yarn.lock",
+    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags;",
+    "repo-publish": "npm run prettier && npm test && npm run repo-tag && npm publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voxgig/seneca-graph.git"
+  },
+  "keywords": [
+    "seneca",
+    "graph"
+  ],
+  "author": "Richard Rodger richardrodger.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/voxgig/seneca-graph/issues"
+  },
+  "homepage": "https://github.com/voxgig/seneca-graph#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "code": "^5.2.4",
+    "coveralls": "^3.0.2",
+    "lab": "^18.0.1",
+    "prettier": "^1.16.4",
+    "seneca": "^3.8.4",
+    "seneca-doc": "^0.1.2",
+    "seneca-entity": "^3.3.0",
+    "seneca-plugin-validator": "^0.0.1",
+    "seneca-promisify": "^0.7.1"
+  }
+}
