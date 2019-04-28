@@ -220,5 +220,5 @@ Load tree of nodes connected by given relation.
 [BadgeNpm]: https://badge.fury.io/js/seneca-graph.svg
 [BadgeTravis]: https://travis-ci.org/seneca/seneca-graph.svg?branch=master
 [Coveralls]: https://coveralls.io/github/seneca/seneca-graph?branch=master
-[Npm]: https://www.npmjs.com/package/seneca-graph
+[Npm]: https://www.npmjs.com/package/@seneca/graph
 [Travis]: https://travis-ci.org/seneca/seneca-graph?branch=master
