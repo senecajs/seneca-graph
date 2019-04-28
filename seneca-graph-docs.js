@@ -67,15 +67,18 @@ module.exports = {
       to: '_to_ parameter, as provided',
       rel: '_rel_ parameter, as provided',
       graph: '_graph_ parameter, as provided',
-      list: [ {
-        f: 'from-side entity identifier',
-        t: 'to-side entity identifier',
-        r: 'relation name',
-        id: 'internal graph node identifier',
-        fe: 'from-side entity',
-        te: 'to-side entity',
-      }, '...' ]
-    }    
+      list: [
+        {
+          f: 'from-side entity identifier',
+          t: 'to-side entity identifier',
+          r: 'relation name',
+          id: 'internal graph node identifier',
+          fe: 'from-side entity',
+          te: 'to-side entity'
+        },
+        '...'
+      ]
+    }
   },
 
   load_tree: {
@@ -107,15 +110,18 @@ module.exports = {
       to: '_to_ parameter, as provided',
       rel: '_rel_ parameter, as provided',
       graph: '_graph_ parameter, as provided',
-      c: [ {
-        f: 'from-side entity identifier',
-        t: 'to-side entity identifier',
-        r: 'relation name',
-        id: 'internal graph node identifier',
-        fe: 'from-side entity',
-        te: 'to-side entity',
-        c: [ '{ ...connected-nodes... }' ]
-      }, '...connected-nodes...' ]
+      c: [
+        {
+          f: 'from-side entity identifier',
+          t: 'to-side entity identifier',
+          r: 'relation name',
+          id: 'internal graph node identifier',
+          fe: 'from-side entity',
+          te: 'to-side entity',
+          c: ['{ ...connected-nodes... }']
+        },
+        '...connected-nodes...'
+      ]
     }
   }
 }

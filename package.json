@@ -1,6 +1,6 @@
 {
   "name": "@seneca/graph",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A Seneca plugin that provides basic graph operations.",
   "main": "seneca-graph.js",
   "scripts": {
