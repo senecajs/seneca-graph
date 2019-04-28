@@ -9,124 +9,146 @@ module.exports = seneca_graph
 module.exports.defaults = {
   maxdepth: 22
 }
-module.exports.errors = {
-}
-
+module.exports.errors = {}
 
 // NEXT: load referenced entity
-
 
 function seneca_graph(options) {
   const seneca = this
 
   const rootspec = intern.configure(options.graph || {})
-  
+
   seneca
     .message('role:graph,add:rel', add_rel)
     .message('role:graph,list:rel', list_rel)
     .message('role:graph,tree:rel', load_tree)
 
-  
-  Object.assign(load_tree,Docs.load_tree)
+  Object.assign(add_rel, Docs.add_rel)
+  Object.assign(list_rel, Docs.list_rel)
+  Object.assign(load_tree, Docs.load_tree)
 
-  
   async function add_rel(msg) {
     const spec = intern.resolve_spec(this, rootspec, msg)
 
-    var rel = await spec.ent.load$({f:msg.from,t:msg.to,r:spec.rel.name})
+    var node = await spec.ent.load$({
+      f: msg.from,
+      t: msg.to,
+      r: spec.rel.name
+    })
 
-    if(!rel) {
-      rel = spec.ent.make$({f:msg.from,t:msg.to,r:spec.rel.name})
-      rel.id$ = msg.__rid__ // for testing
-      rel = await rel.save$()
+    if (!node) {
+      node = spec.ent.make$({ f: msg.from, t: msg.to, r: spec.rel.name })
+      node.id$ = msg.__rid__ // for testing
+      node = await node.save$()
     }
 
-    return rel
+    return {
+      from: msg.from,
+      to: msg.to,
+      rel: spec.rel.name,
+      graph: spec.graph.name,
+      node: node.data$(false)
+    }
   }
-
 
   async function list_rel(msg) {
     const spec = intern.resolve_spec(this, rootspec, msg)
 
-    const q = {r:spec.rel.name}
-    if(msg.from) {
+    const q = { r: spec.rel.name }
+    if (msg.from) {
       q.f = msg.from
     }
-    if(msg.to) {
+    if (msg.to) {
       q.t = msg.to
     }
 
-    const list = (await spec.ent.list$(q)).map(x=>x.data$(false))
+    const list = (await spec.ent.list$(q)).map(x => x.data$(false))
 
-    if('entity' === msg.with) {
-      await intern.load_ents(seneca,spec.graph,list)
+    if (msg.entity) {
+      await intern.load_ents(seneca, spec.graph, list, msg.entity)
     }
-    
-    return {list:list}
+
+    return {
+      from: msg.from,
+      to: msg.to,
+      rel: spec.rel.name,
+      graph: spec.graph.name,
+      list: list
+    }
   }
 
-  
-
-  
   async function load_tree(msg) {
     const seneca = this
     const spec = intern.resolve_spec(this, rootspec, msg)
 
     const maxdepth = msg.depth || 1
-    const root = await traverse({t:msg.from},spec.rel.name,maxdepth,0)
+    const root = await traverse({ t: msg.from }, spec.rel.name, maxdepth, 0)
 
-    return {from:msg.from,rel:spec.rel.name,graph:spec.graph.name,c:root.c}
-    
-    async function traverse(root,relname,maxdepth,depth) {
+    return {
+      from: msg.from,
+      rel: spec.rel.name,
+      graph: spec.graph.name,
+      c: root.c
+    }
+
+    async function traverse(root, relname, maxdepth, depth) {
       depth++
-      var list = await seneca.entity('graph/number').list$({f:root.t,r:relname})
-      
-      root.c = list.map(x=>x.data$(false))
+      var list = await seneca
+        .entity('graph/number')
+        .list$({ f: root.t, r: relname })
 
-      if('entity' === msg.with) {
-        await intern.load_ents(seneca,spec.graph,root.c)
+      root.c = list.map(x => x.data$(false))
+
+      if (msg.entity) {
+        await intern.load_ents(seneca, spec.graph, root.c, msg.entity)
       }
 
-      if(depth < maxdepth && depth < options.maxdepth) {
-        for(var i = 0; i < root.c.length; i++) {
-          await traverse(root.c[i],relname,maxdepth,depth)
+      if (depth < maxdepth && depth < options.maxdepth) {
+        for (var i = 0; i < root.c.length; i++) {
+          await traverse(root.c[i], relname, maxdepth, depth)
         }
       }
 
       return root
     }
   }
-
-
 }
 
+const intern = (seneca_graph.intern = {
+  load_ents: async function(seneca, graph, list, side) {
+    if ('from' === side || 'both' === side) {
+      await load_ents_side('f')
+    }
+    if ('to' === side || 'both' === side) {
+      await load_ents_side('t')
+    }
 
-const intern = (seneca_graph.intern) = {
-  load_ents: async function(seneca, graph, list) {
-    var ids = list.map(x=>x.t)
-    var ents = await intern.load_from_ids(seneca,graph.entity,ids)
-    for(var i = 0; i < list.length; i++) {
-      list[i].ent = ents[i]
+    async function load_ents_side(side) {
+      var ids = list.map(x => x[side])
+      var ents = await intern.load_ids(seneca, graph.entity, ids)
+      for (var i = 0; i < list.length; i++) {
+        list[i][side + 'e'] = ents[i]
+      }
     }
   },
 
   // TODO: seneca-entity should provide this
-  load_from_ids: async function(seneca,canon,ids) {
+  load_ids: async function(seneca, canon, ids) {
     var ents = []
-    for(var i = 0; i < ids.length; i++) {
+    for (var i = 0; i < ids.length; i++) {
       ents.push(await seneca.entity(canon).load$(ids[i]))
     }
     return ents
   },
-  
+
   resolve_spec: function(seneca, rootspec, msg) {
     const graphname = msg.graph
-    const relname   = msg.rel
+    const relname = msg.rel
 
     const graph = rootspec[graphname]
     const rel = graph.rel[relname]
-    const ent = seneca.entity('graph/'+graphname)
-    
+    const ent = seneca.entity('graph/' + graphname)
+
     return {
       ent,
       rel,
@@ -134,29 +156,37 @@ const intern = (seneca_graph.intern) = {
     }
   },
 
-  graph_schema: Joi.object().pattern(/^/, Joi.object({
-    entity: Joi.string().required(),
-    rel: Joi.object().pattern(/^/, Joi.object({
-      kind: Joi.string().required()
-    }))
-  })).default({}),
-  
+  graph_schema: Joi.object()
+    .pattern(
+      /^/,
+      Joi.object({
+        entity: Joi.string().required(),
+        rel: Joi.object().pattern(
+          /^/,
+          Joi.object({
+            kind: Joi.string().required()
+          })
+        )
+      })
+    )
+    .default({}),
+
   configure: function(graphdef) {
     const spec = {}
 
     graphdef = Joi.attempt(graphdef, intern.graph_schema)
 
-    Object.keys(graphdef).forEach(gn=>{
+    Object.keys(graphdef).forEach(gn => {
       var g = graphdef[gn]
       g.name = gn
 
-      Object.keys(g.rel).forEach(rn=>{
+      Object.keys(g.rel).forEach(rn => {
         var r = g.rel[rn]
         r.name = rn
       })
       spec[gn] = g
     })
-    
+
     return spec
-  },
-}
+  }
+})

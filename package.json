@@ -1,10 +1,10 @@
 {
-  "name": "seneca-graph",
-  "version": "0.1.2",
+  "name": "@seneca/graph",
+  "version": "0.0.0",
   "description": "A Seneca plugin that provides basic graph operations.",
   "main": "seneca-graph.js",
   "scripts": {
-    "test": "lab -P test -t 80",
+    "test": "lab -P test -t 90",
     "doc": "seneca-doc",
     "prettier": "prettier --write *.js lib/*.js bin/*.js test/*.js",
     "coveralls": "lab -s -P test -r lcov | coveralls",
