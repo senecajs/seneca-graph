@@ -217,7 +217,7 @@ Load tree of nodes connected by given relation.
 
 
 [BadgeCoveralls]: https://coveralls.io/repos/seneca/seneca-graph/badge.svg?branch=master&service=github
-[BadgeNpm]: https://badge.fury.io/js/@seneca/graph.svg
+[BadgeNpm]: https://badge.fury.io/js/%40seneca%2Fgraph.svg
 [BadgeTravis]: https://travis-ci.org/seneca/seneca-graph.svg?branch=master
 [Coveralls]: https://coveralls.io/github/seneca/seneca-graph?branch=master
 [Npm]: https://www.npmjs.com/package/@seneca/graph
