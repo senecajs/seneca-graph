@@ -7,7 +7,7 @@ const Docs = require('./seneca-graph-docs.js')
 
 module.exports = seneca_graph
 module.exports.defaults = {
-  maxdepth: 22
+  maxdepth: Joi.number().default(22).description("Global maximum depth of traversal.")
 }
 module.exports.errors = {}
 
@@ -16,6 +16,7 @@ module.exports.errors = {}
 function seneca_graph(options) {
   const seneca = this
 
+  intern.MAXDEPTH = options.maxdepth
   const rootspec = intern.configure(options.graph || {})
 
   seneca
@@ -82,7 +83,9 @@ function seneca_graph(options) {
     const spec = intern.resolve_spec(this, rootspec, msg)
 
     const maxdepth = msg.depth || 1
-    const root = await traverse({ t: msg.from }, spec.rel.name, maxdepth, 0)
+
+    // NOTE: start with a virtual node to ensure traversal can descend from-wise
+    const root = await intern.traverse(this, { t: msg.from }, spec, msg, maxdepth, 0)
 
     return {
       from: msg.from,
@@ -90,31 +93,35 @@ function seneca_graph(options) {
       graph: spec.graph.name,
       c: root.c
     }
-
-    async function traverse(root, relname, maxdepth, depth) {
-      depth++
-      var list = await seneca
-        .entity('graph/number')
-        .list$({ f: root.t, r: relname })
-
-      root.c = list.map(x => x.data$(false))
-
-      if (msg.entity) {
-        await intern.load_ents(seneca, spec.graph, root.c, msg.entity)
-      }
-
-      if (depth < maxdepth && depth < options.maxdepth) {
-        for (var i = 0; i < root.c.length; i++) {
-          await traverse(root.c[i], relname, maxdepth, depth)
-        }
-      }
-
-      return root
-    }
   }
 }
 
 const intern = (seneca_graph.intern = {
+  MAXDEPTH: NaN,
+  traverse: async function(seneca, root, spec, msg, maxdepth, depth) {
+    depth++
+    var list = await seneca
+        .entity('graph/'+spec.graph.name)
+    
+    // NOTE: the next level is "from" the "to" of parent level
+        .list$({ f: root.t, r: spec.rel.name })
+    
+    root.c = list.map(x => x.data$(false))
+    
+      if (msg.entity) {
+        await intern.load_ents(seneca, spec.graph, root.c, msg.entity)
+      }
+    
+    if (depth < maxdepth && depth < intern.MAXDEPTH) {
+      for (var i = 0; i < root.c.length; i++) {
+        await intern.traverse(seneca, root.c[i], spec, msg, maxdepth, depth)
+      }
+    }
+    
+    return root
+  },
+
+
   load_ents: async function(seneca, graph, list, side) {
     if ('from' === side || 'both' === side) {
       await load_ents_side('f')

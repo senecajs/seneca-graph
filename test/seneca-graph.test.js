@@ -386,13 +386,6 @@ lab.test('intern.configure', async () => {
 
   expect(() => cfg(null)).throw()
   expect(() => cfg({ graph: 1 })).throw()
-
-  /*
-  expect(Util.inspect(cfg({
-    graph:g0
-  })),{compact:true})
-    .equal("{ number: { ent: $-/qaz/number;id=;{} } }")
-  */
 })
 
 function seneca_instance(config, plugin_options) {
