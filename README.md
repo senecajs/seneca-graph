@@ -175,7 +175,7 @@ Load tree of nodes connected by given relation.
   * From-side entity identifier.
 * _to_: string
   * To-side entity identifier.
-* _depth_: number <i><small>{default:1}</small></i>
+* _depth_: number <i><small>{unsafe:false,default:1}</small></i>
   * Depth of graph to traverse.
 * _entity_: string <i><small>{allowOnly:true}</small></i>
   * Entity side to load. Values: _from_, _to_, _both_.

@@ -377,6 +377,45 @@ lab.test('add-idempotent', async () => {
   expect(out1).equal(out0)
 })
 
+lab.test('global-maxdepth', async () => {
+  var si = await seneca_instance({}, { maxdepth: 1, graph: g0 }).ready()
+
+  var zero = await si
+    .entity('qaz/number')
+    .data$({ id$: 'n0', n: 'zero', v: 0 })
+    .save$()
+  var one = await si
+    .entity('qaz/number')
+    .data$({ id$: 'n1', n: 'one', v: 1 })
+    .save$()
+  var two = await si
+    .entity('qaz/number')
+    .data$({ id$: 'n2', n: 'two', v: 2 })
+    .save$()
+
+  var out = await si.post('role:graph,add:rel,graph:number', {
+    rel: 'lessthan',
+    from: zero.id,
+    to: one.id,
+    __rid__: 'r0'
+  })
+  out = await si.post('role:graph,add:rel,graph:number', {
+    rel: 'lessthan',
+    from: one.id,
+    to: two.id,
+    __rid__: 'r1'
+  })
+
+  out = await si.post('role:graph,tree:rel,graph:number', {
+    rel: 'lessthan',
+    from: zero.id,
+    depth: 2 // overridden by global maxdepth option
+  })
+
+  // depth only goes to level 1
+  expect(out.c[0].c).not.exists()
+})
+
 lab.test('intern.configure', async () => {
   var seneca = await seneca_instance().ready()
 
