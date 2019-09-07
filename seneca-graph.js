@@ -1,7 +1,7 @@
 /* Copyright (c) 2019 voxgig and other contributors, MIT License */
 'use strict'
 
-const Joi = require('joi')
+const Joi = require('@hapi/joi')
 
 const Docs = require('./seneca-graph-docs.js')
 

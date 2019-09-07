@@ -3,8 +3,8 @@
 
 const Util = require('util')
 
-const Lab = require('lab')
-const Code = require('code')
+const Lab = require('@hapi/lab')
+const Code = require('@hapi/code')
 const lab = (exports.lab = Lab.script())
 const expect = Code.expect
 
@@ -23,12 +23,7 @@ const g0 = {
   }
 }
 
-lab.test(
-  'validate',
-  Util.promisify(function(x, fin) {
-    PluginValidator(Plugin, module)(fin)
-  })
-)
+lab.test('validate', PluginValidator(Plugin, module))
 
 lab.test('happy', async () => {
   var si = await seneca_instance({}, { graph: g0 }).ready()
