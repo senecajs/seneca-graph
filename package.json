@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/voxgig/seneca-graph.git"
+    "url": "git+https://github.com/senecajs/seneca-graph.git"
   },
   "keywords": [
     "seneca",
@@ -24,9 +24,9 @@
   "author": "Richard Rodger richardrodger.com",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/voxgig/seneca-graph/issues"
+    "url": "https://github.com/senecajs/seneca-graph/issues"
   },
-  "homepage": "https://github.com/voxgig/seneca-graph#readme",
+  "homepage": "https://github.com/senecajs/seneca-graph#readme",
   "dependencies": {
     "@hapi/joi": "^17.1.0"
   },
