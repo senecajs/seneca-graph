@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/senecajs/seneca-graph#readme",
   "dependencies": {
-    "@hapi/joi": "^17.1.0"
+    "@hapi/joi": "^17.1.1"
   },
   "devDependencies": {
     "@hapi/code": "^8.0.1",
